@@ -22,13 +22,10 @@
  * THE SOFTWARE.
  */
 
-import com.vanniktech.maven.publish.SonatypeHost
-
 plugins {
-    id 'com.github.johnrengelman.shadow' version '7.1.2'
-    id 'maven-publish'
+    id 'com.gradleup.shadow' version '9.6.1'
     id 'application'
-    id "com.vanniktech.maven.publish"
+    id "com.vanniktech.maven.publish.base"
 }
 
 application {
@@ -56,31 +53,42 @@ spotless {
     }
 }
 
-// Should be the latest supporting version of NullAway.
-def NULLAWAY_TEST = "0.12.4"
-
 tasks.test.dependsOn(':annotator-scanner:publishToMavenLocal')
 
 // Set up environment variables for test configuration tu run with the latest development version.
 tasks.test.doFirst {
-    environment "NULLAWAY_TEST_VERSION", NULLAWAY_TEST
+    environment "NULLAWAY_TEST_VERSION", deps.versions.nullaway
+    environment "ERROR_PRONE_TEST_VERSION", deps.versions.errorProne
     environment "ANNOTATOR_VERSION", project.version
+}
+
+java {
+    withSourcesJar()
+    withJavadocJar()
 }
 
 publishing {
     publications {
-        shadow(MavenPublication) { publication ->
-            project.shadow.component(publication)
-        }
-    }
+        maven(MavenPublication) {
+            from components.java
 
-    repositories {
-        mavenLocal()
+            // All runtime dependencies are bundled into the primary shadow JAR. Keep them in
+            // Gradle module metadata for consumers of the nonshadow variants, but not in the POM.
+            pom.withXml {
+                asNode().dependencies.dependency.toList().each {
+                    it.parent().remove(it)
+                }
+            }
+        }
     }
 }
 
 mavenPublishing {
-    publishToMavenCentral(SonatypeHost.CENTRAL_PORTAL)
+    publishToMavenCentral()
+    pomFromGradleProperties()
+    if (providers.gradleProperty("RELEASE_SIGNING_ENABLED").getOrElse("true").toBoolean()) {
+        signAllPublications()
+    }
 }
 
 jar {
@@ -90,20 +98,28 @@ jar {
 
 // To remove the "-all" postfix from the produced jar file.
 shadowJar {
-    archiveClassifier = null
+    archiveClassifier = ""
 }
 
-// Exclude tests not supported by Java 11.
-if (JavaVersion.current().isJava11()) {
-    // exclude Java17Test which is designed to test Java 17 features.
+// Java21Test builds a target project with Java 21 language features.
+if (!JavaVersion.current().isCompatibleWith(JavaVersion.VERSION_21)) {
     test {
         filter {
-            excludeTestsMatching "edu.ucr.cs.riple.core.Java17Test"
+            excludeTestsMatching "edu.ucr.cs.riple.core.Java21Test"
         }
     }
 }
 
-// Temporarily exclude LombokTest on all Java versions until a solution is found.
+// Java25Test builds a target project with language features released after Java 21.
+if (!JavaVersion.current().isCompatibleWith(JavaVersion.VERSION_25)) {
+    test {
+        filter {
+            excludeTestsMatching "edu.ucr.cs.riple.core.Java25Test"
+        }
+    }
+}
+
+// temporarily exclude LombokTest until we find a solution for the issue.
 test {
     filter {
         excludeTestsMatching "edu.ucr.cs.riple.core.LombokTest"

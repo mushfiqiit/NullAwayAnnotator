@@ -126,7 +126,7 @@ dependencies {
     // Nullable annotations
     compileOnly "com.google.code.findbugs:jsr305:3.0.2"
     // JSpecify annotations for NullUnmarked
-    compileOnly "org.jspecify:jspecify:0.3.0"
+    compileOnly "org.jspecify:jspecify:1.0.1"
     //All other target project dependencies
 }  
 
@@ -182,6 +182,7 @@ Here are some useful __optional__ arguments that can alter the default configura
 |--------------------------------------------------------|-------------|
 | `-n,--nullable <arg>`                                  | Sets custom `@Nullable` annotation. |
 | `-rboserr, --redirect-build-output-stderr`             | Redirects build outputs to `STD Err`. |
+| `-ll, --language-level <arg>`                          | Parser language level. Accepts any release the bundled parser supports (`11` … `26`). Defaults to `17`. Set it to the release the target project compiles with, otherwise its syntax fails to parse. |
 
 
 To learn more about all the __optional__ arguments, please refer to [OPTIONS.md](./OPTIONS.md)
