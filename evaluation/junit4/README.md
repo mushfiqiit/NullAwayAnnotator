@@ -7,7 +7,7 @@ This directory holds a standalone Gradle build that compiles the main sources of
 |---|---|
 | `run-nullaway.sh` | Runs NullAway on junit4 and writes `nullaway-warnings.txt` (every NullAway diagnostic) and `nullaway-report.txt` (totals by warning type and by file). |
 | `run-annotator.sh` | Builds NullAwayAnnotator from this checkout, then runs it on junit4. **It edits the junit4 sources in place.** |
-| `remove-nullunmarked.py` | Removes the `@NullUnmarked` annotations (and their import) that the annotator added to suppress the errors it could not fix, so NullAway reports those errors again. Also edits junit4 in place; `--dry-run` only lists what it would remove. |
+| `remove-suppressions.py` | Removes every suppression the annotator added for errors it could not fix: `@NullUnmarked` (and its import), `@SuppressWarnings("NullAway")` and `@SuppressWarnings("NullAway.Init")`, so NullAway reports all remaining errors again. junit4's own `@SuppressWarnings` values are kept. Also edits junit4 in place; `--dry-run` only lists what it would remove. |
 
 junit4's own Maven build targets Java 5, which Error Prone does not support, so junit4 is
 compiled here with `--release 21` instead, without changing junit4 itself.
@@ -15,7 +15,7 @@ compiled here with `--release 21` instead, without changing junit4 itself.
 ## Requirements
 
 - JDK 21. On macOS the scripts pick it up with `/usr/libexec/java_home -v 21`; elsewhere set `JAVA_HOME`.
-- Python 3 for `remove-nullunmarked.py`.
+- Python 3 for `remove-suppressions.py`.
 - A junit4 checkout. By default the scripts read
   `/Users/mushfiqurrahmanchowdhury/Documents/junit4/src/main/java`; set `JUNIT4_SRC` to use another path.
 
@@ -44,16 +44,16 @@ compiled here with `--release 21` instead, without changing junit4 itself.
    (cd /path/to/junit4 && git diff --stat)   # files the annotator changed
    ./run-nullaway.sh                         # remaining NullAway errors after annotation
    ```
-5. To see the errors the annotator suppressed with `@NullUnmarked`, remove those annotations
-   and run NullAway again:
+5. To get the real number of errors remaining after annotation, remove the suppressions the
+   annotator added and run NullAway again:
    ```bash
    (cd /path/to/junit4 && git commit -am "NullAwayAnnotator output")   # keep the annotated version
-   ./remove-nullunmarked.py --dry-run   # list what would be removed
-   ./remove-nullunmarked.py             # remove them
-   ./run-nullaway.sh                    # errors that @NullUnmarked was hiding
+   ./remove-suppressions.py --dry-run   # list what would be removed
+   ./remove-suppressions.py             # remove them
+   ./run-nullaway.sh                    # all errors remaining after annotation
    ```
-   `@SuppressWarnings("NullAway")` annotations the annotator adds (for field initializers,
-   where `@NullUnmarked` cannot go) are kept.
+   The inferred `@Nullable` and `@Initializer` annotations are kept, since they are the
+   annotator's fixes rather than suppressions.
 
 ## Configuration
 
