@@ -20,4 +20,3 @@ Here are all __optional__ arguments that can alter Annotator's default configura
 | `-drdl, --deactivate-region-detection-lombok`          | Deactivates region detection for Lombok. |
 | `-nna, --nonnull-annotations <arg>`                    | Adds a list of non-null annotations separated by a comma to be acknowledged by Annotator (e.g., com.example1.Nonnull,com.example2.Nonnull) |
 | `eic, enable-impact-cache`                             | Enables fixes impacts caching for next cycles. |
-| `-ll, --language-level <arg>`                          | Java language level used by the parser when reading source files. Accepts any release the bundled parser supports (`11` … `26`). Defaults to `17`. Set it to the release the target project compiles with, otherwise its syntax fails to parse — e.g. record and switch patterns need `21`, unnamed variables (`_`) need `22`. |

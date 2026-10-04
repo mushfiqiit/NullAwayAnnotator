@@ -23,7 +23,7 @@ import net.ltgt.gradle.errorprone.CheckSeverity
 
 plugins {
     id 'java'
-    id "net.ltgt.errorprone" version "5.1.0"
+    id "net.ltgt.errorprone" version "2.0.1"
 }
 
 repositories {
@@ -41,10 +41,11 @@ dependencies {
     // Nullable annotations
     compileOnly "com.google.code.findbugs:jsr305:3.0.2"
     // JSpecify annotations for NullUnmarked
-    compileOnly "org.jspecify:jspecify:1.0.1"
+    compileOnly "org.jspecify:jspecify:0.3.0"
 
     annotationProcessor "com.uber.nullaway:nullaway:0.10.10"
     errorprone "com.google.errorprone:error_prone_core:2.4.0"
+    errorproneJavac "com.google.errorprone:javac:9+181-r4173-1"
 }
 
 def scanner_config_path = "${project.projectDir.absolutePath}/annotator-out/scanner.xml"

@@ -283,15 +283,15 @@ public class CoreTestHelper {
       Utility.executeCommand(config.downstreamDependenciesBuildCommand);
       // Verify no error is reported in downstream dependencies.
       for (int i = 1; i < modules.size(); i++) {
-        Path path = outDirPath.resolve(i + "").resolve("errors.xml");
+        Path path = outDirPath.resolve(i + "").resolve("errors.tsv");
         try {
-          String content = Files.readString(path);
-          if (content.contains("<error")) {
+          List<String> lines = Files.readAllLines(path);
+          if (lines.size() != 1) {
             fail(
                 "Strict mode introduced errors in downstream dependency module: "
                     + modules.get(i)
                     + ", errors:\n"
-                    + content);
+                    + lines);
           }
         } catch (IOException e) {
           throw new RuntimeException("Exception happened while reading file at: " + path);
@@ -301,11 +301,11 @@ public class CoreTestHelper {
     if (suppressRemainingErrors) {
       // Check no error will be reported in Target module
       Utility.executeCommand(config.buildCommand);
-      Path path = outDirPath.resolve("0").resolve("errors.xml");
+      Path path = outDirPath.resolve("0").resolve("errors.tsv");
       try {
-        String content = Files.readString(path);
-        if (content.contains("<error")) {
-          fail("Suppress Remaining Errors Mode did not resolve all errors:\n" + content);
+        List<String> lines = Files.readAllLines(path);
+        if (lines.size() != 1) {
+          fail("Suppress Remaining Errors Mode did not resolve all errors:\n" + lines);
         }
       } catch (IOException e) {
         throw new RuntimeException("Exception happened while reading file at: " + path);

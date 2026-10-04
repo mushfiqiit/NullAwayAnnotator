@@ -25,9 +25,7 @@ plugins {
 }
 
 version=""
-base {
-    archivesName = "librarymodel"
-}
+archivesBaseName = "librarymodel"
 
 dependencies {
     compileOnly deps.apt.autoService
